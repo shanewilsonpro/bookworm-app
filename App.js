@@ -1,17 +1,33 @@
-import React from 'react';
-import { StyleSheet, Text } from 'react-native';
+import React, { Component } from 'react';
 
 import { createAppContainer, createSwitchNavigator, createStackNavigator, createDrawerNavigator } from "react-navigation";
 
 import WelcomeScreen from "./screens/AppSwitchNavigator/welcome-screen";
 import HomeScreen from "./screens/home-screen";
-import SignupScreen from "./screens/signup-screen";
+import LoginScreen from "./screens/login-screen";
 import SettingsScreen from "./screens/settings-screen";
 import CustomDrawerComponent from "./screens/DrawerNavigator/custom-drawer-component";
+import LoadingScreen from "./screens/AppSwitchNavigator/loading-screen";
 
 import { Ionicons } from "@expo/vector-icons";
+import colors from './assets/colors';
+import * as firebase from "firebase";
+import { firebaseConfig } from "./config/config";
 
-const App = () => <AppContainer />;
+class App extends React.Component {
+  constructor() {
+    super();
+    this.initializeFirebase();
+  }
+
+  initializeFirebase = () => {
+    firebase.initializeApp(firebaseConfig);
+  };
+  
+  render() {
+    return <AppContainer />;
+  }
+}
 
 const LoginStackNavigator = createStackNavigator({
   WelcomeScreen: {
@@ -20,7 +36,17 @@ const LoginStackNavigator = createStackNavigator({
       header: null
     }
   },
-  SignupScreen
+  LoginScreen: {
+    screen: LoginScreen,
+    navigationOptions: {}
+  }
+}, {
+  mode: 'modal',
+  defaultNavigationOptions: {
+    headerStyle: {
+      backgroundColor: colors.bgMain
+    }
+  }
 })
 
 const AppDrawerNavigator = createDrawerNavigator({
@@ -43,6 +69,7 @@ const AppDrawerNavigator = createDrawerNavigator({
 })
 
 const AppSwitchNavigator = createSwitchNavigator({
+  LoadingScreen,
   LoginStackNavigator,
   AppDrawerNavigator
 });

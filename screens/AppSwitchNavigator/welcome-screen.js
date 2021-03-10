@@ -14,11 +14,8 @@ export default class WelcomeScreen extends React.Component {
                     <Text style={styles.iconText}>Bookworm</Text>
                 </View>
                 <View style={styles.buttonsContainer}>
-                    <CustomActionButton style={styles.loginButton} title="Login" onPress={() => this.props.navigation.navigate('HomeScreen')}>
+                    <CustomActionButton style={styles.loginButton} title="Login" onPress={() => this.props.navigation.navigate('LoginScreen')}>
                         <Text style={styles.loginButtonText}>Login</Text>
-                    </CustomActionButton>
-                    <CustomActionButton style={styles.signupButton} title="Sign Up" onPress={() => this.props.navigation.navigate('SignupScreen')}>
-                        <Text style={styles.signupButtonText}>Sign Up</Text>
                     </CustomActionButton>
                 </View>
             </View>
@@ -47,7 +44,6 @@ const styles = StyleSheet.create({
         flex: 1,
         borderColor: 'orange',
         alignItems: 'center',
-        // justifyContent: 'flex-start',
     },
     loginButton: {
         width: 200,
