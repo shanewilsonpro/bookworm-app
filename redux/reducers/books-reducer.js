@@ -1,7 +1,9 @@
 const initialState = {
     books: [],
     booksReading: [],
-    booksRead: []
+    booksRead: [],
+    isLoadingBooks: true,
+    image: null
 };
 
 const books = (state = initialState, action) => {
@@ -29,6 +31,36 @@ const books = (state = initialState, action) => {
                     return book;
                 }),
                 booksRead: [...state.booksRead, action.payload],
+                booksReading: state.booksReading.filter(
+                    book => book.name !== action.payload.name
+                )
+            };
+        case 'TOGGLE_IS_LOADING_BOOKS':
+            return {
+                ...state,
+                isLoadingBooks: action.payload
+            };
+        case 'MARK_BOOK_AS_UNREAD':
+            return {
+                ...state,
+                books: state.books.map(book => {
+                    if (book.name == action.payload.name) {
+                        return { ...book, read: false };
+                    }
+                    return book;
+                }),
+                booksRead: state.booksRead.filter(
+                    book => book.name !== action.payload.name
+                ),
+                booksReading: [...state.booksReading, action.payload]
+            };
+        case 'DELETE_BOOK':
+            return {
+                ...state,
+                books: state.books.filter(book => book.name !== action.payload.name),
+                booksRead: state.booksRead.filter(
+                    book => book.name !== action.payload.name
+                ),
                 booksReading: state.booksReading.filter(
                     book => book.name !== action.payload.name
                 )

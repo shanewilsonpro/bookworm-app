@@ -1,9 +1,10 @@
 import React from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TextInput, FlatList, Image } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TextInput, FlatList, Image, ActivityIndicator } from 'react-native';
 
 import BookCount from "../components/book-count";
 import CustomActionButton from "../components/custom-action-button";
 import { Ionicons } from "@expo/vector-icons";
+import Swipeout from 'react-native-swipeout';
 
 import colors from '../assets/colors';
 import * as firebase from "firebase";
@@ -48,6 +49,7 @@ class HomeScreen extends React.Component {
     });
 
     this.props.loadBooks(booksArray.reverse());
+    this.props.toggleIsLoadingBooks(false);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -73,6 +75,7 @@ class HomeScreen extends React.Component {
     this.setState({ textInputData: '' });
     this.textInputRef.setNativeProps({ text: '' });
     try {
+      this.props.toggleIsLoadingBooks(true);
       const snapshot = await firebase.database().ref('books')
         .child(this.state.currentUser.uid).orderByChild('name').equalTo(book).once('value');
       if (snapshot.exists()) {
@@ -85,16 +88,20 @@ class HomeScreen extends React.Component {
           .child(this.state.currentUser.uid).child(key).set({ name: book, read: false });
 
         this.props.addBook({ name: book, read: false, key: key });
+        this.props.toggleIsLoadingBooks(false);
 
       }
 
     } catch (error) {
       console.log(error);
+      this.props.toggleIsLoadingBooks(false);
     }
   };
 
   markAsRead = async (selectedBook, index) => {
     try {
+      this.props.toggleIsLoadingBooks(true);
+
       await firebase.database().ref('books').child(this.state.currentUser.uid).child(selectedBook.key).update({ read: true });
       let books = this.state.books.map(book => {
         if (book.name == selectedBook) {
@@ -113,24 +120,112 @@ class HomeScreen extends React.Component {
       }));
 
       this.props.markBookAsRead(selectedBook);
+      this.props.toggleIsLoadingBooks(false);
 
     } catch (error) {
-      console.log(error)
+      console.log(error);
+      this.props.toggleIsLoadingBooks(false);
     }
   };
 
-  renderItem = (item, index) => (
-    <ListItem item={item}>
-      { item.read ?
-        (
-          <Ionicons name='ios-checkmark' color={colors.logoColor} size={30} />
-        )
-        : (
-          <CustomActionButton style={styles.markasReadButton} onPress={() => this.markAsRead(item, index)}>
-            <Text style={styles.markAsReadButtonText}>Mark as Read</Text>
-          </CustomActionButton>
-        )}
-    </ListItem>
+  markAsUnread = async (selectedBook, index) => {
+    try {
+      this.props.toggleIsLoadingBooks(true);
+
+      await firebase
+        .database()
+        .ref('books')
+        .child(this.state.currentUser.uid)
+        .child(selectedBook.key)
+        .update({ read: false });
+
+      this.props.markBookAsUnread(selectedBook);
+      this.props.toggleIsLoadingBooks(false);
+    } catch (error) {
+      console.log(error);
+      this.props.toggleIsLoadingBooks(false);
+    }
+  };
+
+  deleteBook = async (selectedBook, index) => {
+    try {
+      this.props.toggleIsLoadingBooks(true);
+
+      await firebase
+        .database()
+        .ref('books')
+        .child(this.state.currentUser.uid)
+        .child(selectedBook.key)
+        .remove();
+
+      this.props.deleteBook(selectedBook);
+      this.props.toggleIsLoadingBooks(false);
+    } catch (error) {
+      console.log(error);
+      this.props.toggleIsLoadingBooks(false);
+    }
+  };
+
+  renderItem = (item, index) => {
+    let swipeoutButtons = [
+      {
+        text: 'Delete',
+        component: (
+          <View
+            style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Ionicons name="ios-trash" size={24} color='white' />
+          </View>
+        ),
+        backgroundColor: colors.bgDelete,
+        onPress: () => this.deleteBook(item, index)
+      }
+    ];
+
+    if (!item.read) {
+      swipeoutButtons.unshift({
+        text: 'Mark Read',
+        component: (
+          <View
+            style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Text style={{ color: 'white' }}>Mark as Read</Text>
+          </View>
+        ),
+        backgroundColor: colors.bgSuccessDark,
+        onPress: () => this.markAsRead(item, index)
+      });
+    } else {
+      swipeoutButtons.unshift({
+        text: 'Mark Unread',
+        component: (
+          <View
+            style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Text style={{ color: 'white' }}>Mark Unread</Text>
+          </View>
+        ),
+        backgroundColor: colors.bgUnread,
+        onPress: () => this.markAsUnread(item, index)
+      });
+    }
+
+    return (
+      <Swipeout
+        autoClose={true}
+        style={{ marginHorizontal: 5, marginVertical: 5 }}
+        backgroundColor={colors.bgMain}
+        right={swipeoutButtons}
+      >
+        <ListItem marginVertical={0} item={item}>
+          {item.read &&
+            (
+              <Ionicons style={{ marginRight: 5 }} name='ios-checkmark' color={colors.logoColor} size={30} />
+            )}
+        </ListItem>
+      </Swipeout>
+    );
+
 
     // <View style={styles.listItemContainer}>
     //   <View style={styles.imageContainer}>
@@ -141,7 +236,7 @@ class HomeScreen extends React.Component {
     //   </View>
 
     // </View>
-  );
+  };
 
   render() {
     return (
@@ -149,6 +244,19 @@ class HomeScreen extends React.Component {
         <SafeAreaView />
 
         <View style={styles.container}>
+          {this.props.books.isLoadingBooks && (
+            <View
+              style={{
+                ...StyleSheet.absoluteFill,
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1000,
+                elevation: 1000
+              }}
+            >
+              <ActivityIndicator size="large" color={colors.logoColor} />
+            </View>
+          )}
           <View style={styles.textInputContainer}>
             <TextInput
               onChangeText={(text) => this.setState({ textInputData: text })}
@@ -177,8 +285,9 @@ class HomeScreen extends React.Component {
             renderItem={({ item }, index) => this.renderItem(item, index)}
             keyExtractor={(item, index) => index.toString()}
             ListEmptyComponent={
-              <ListEmptyComponent text="Not Reading Any Books" />
-            }
+              !this.props.books.isLoadingBooks && (
+                <ListEmptyComponent text="Not Reading Any Books" />
+              )}
           />
 
           <Animatable.View animation={this.state.textInputData.length > 0 ? 'slideInRight' : 'slideOutRight'}>
@@ -210,7 +319,10 @@ const mapDispatchToProps = dispatch => {
     loadBooks: books =>
       dispatch({ type: 'LOAD_BOOKS_FROM_SERVER', payload: books }),
     addBook: book => dispatch({ type: 'ADD_BOOK', payload: book }),
-    markBookAsRead: book => dispatch({ type: 'MARK_BOOK_AS_READ', payload: book })
+    markBookAsRead: book => dispatch({ type: 'MARK_BOOK_AS_READ', payload: book }),
+    markBookAsUnread: book => dispatch({ type: 'MARK_BOOK_AS_UNREAD', payload: book }),
+    deleteBook: book => dispatch({ type: 'DELETE_BOOK', payload: book }),
+    toggleIsLoadingBooks: bool => dispatch({ type: 'TOGGLE_IS_LOADING_BOOKS', payload: bool })
   }
 }
 
