@@ -1,20 +1,63 @@
-import React, { Component } from "react";
-import { View, Text, StyleSheet } from 'react-native';
+import React, { Component } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator
+} from 'react-native';
+import colors from '../../assets/colors';
+import ListItem from '../../components/list-item';
+import { connect } from 'react-redux';
+import ListEmptyComponent from '../../components/list-empty-component';
 
 class BooksReadScreen extends Component {
-    render() {
-        return (
-            <View style={styles.container}><Text>hi</Text></View>
-        )
-    }
+  renderItem = item => {
+    return <ListItem item={item} />;
+  };
+
+  render() {
+    return (
+      <View style={styles.container}>
+        {this.props.books.isLoadingBooks && (
+          <View
+            style={{
+              ...StyleSheet.absoluteFill,
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              elevation: 1000
+            }}
+          >
+            <ActivityIndicator size="large" color={colors.logoColor} />
+          </View>
+        )}
+        <FlatList
+          data={this.props.books.booksRead}
+          renderItem={({ item }, index) => this.renderItem(item, index)}
+          keyExtractor={(item, index) => index.toString()}
+          ListEmptyComponent={
+            !this.props.books.isLoadingBooks && (
+              <ListEmptyComponent text="No Books Read" />
+            )
+          }
+        />
+      </View>
+    );
+  }
 }
 
-export default BooksReadScreen;
+const mapStateToProps = state => {
+  return {
+    books: state.books
+  };
+};
+
+export default connect(mapStateToProps)(BooksReadScreen);
 
 const styles = StyleSheet.create({
-    container: {
-        flex:1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    }
-})
+  container: {
+    flex: 1,
+    backgroundColor: colors.bgMain
+  }
+});
