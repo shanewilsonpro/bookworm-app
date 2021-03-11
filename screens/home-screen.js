@@ -8,12 +8,16 @@ import Swipeout from 'react-native-swipeout';
 
 import colors from '../assets/colors';
 import * as firebase from "firebase";
+import 'firebase/storage'
 import { snapshotToArray } from "../helpers/firebase-helpers";
 import ListItem from "../components/list-item";
 import * as Animatable from 'react-native-animatable';
 import ListEmptyComponent from "../components/list-empty-component";
 
 import { connect } from "react-redux";
+import { compose } from "redux";
+import { connectActionSheet } from "@expo/react-native-action-sheet";
+import * as ImageHelpers from '../helpers/image-helpers';
 
 class HomeScreen extends React.Component {
   constructor() {
@@ -166,6 +170,75 @@ class HomeScreen extends React.Component {
     }
   };
 
+  uploadImage = async (image, selectedBook) => {
+    const ref = firebase
+      .storage()
+      .ref('books')
+      .child(this.state.currentUser.uid)
+      .child(selectedBook.key);
+
+    try {
+      const blob = await ImageHelpers.prepareBlob(image.uri);
+      const snapshot = await ref.put(blob);
+
+      let downloadUrl = await ref.getDownloadURL();
+
+      await firebase
+        .database()
+        .ref('books')
+        .child(this.state.currentUser.uid)
+        .child(selectedBook.key)
+        .update({ image: downloadUrl });
+
+      blob.close();
+
+      return downloadUrl;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  openImageLibrary = async selectedBook => {
+    const result = await ImageHelpers.openImageLibrary();
+
+    if (result) {
+      this.props.toggleIsLoadingBooks(true);
+      const downloadUrl = await this.uploadImage(result, selectedBook);
+      this.props.updateBookImage({ ...selectedBook, uri: downloadUrl });
+      this.props.toggleIsLoadingBooks(false);
+    }
+  };
+
+  openCamera = async selectedBook => {
+    const result = await ImageHelpers.openCamera();
+
+    if (result) {
+      this.props.toggleIsLoadingBooks(true);
+      const downloadUrl = await this.uploadImage(result, selectedBook);
+      this.props.updateBookImage({ ...selectedBook, uri: downloadUrl });
+      this.props.toggleIsLoadingBooks(false);
+    }
+  };
+
+  addBookImage = selectedBook => {
+    const options = ['Select from Photos', 'Camera', 'Cancel'];
+    const cancelButtonIndex = 2;
+
+    this.props.showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex
+      },
+      buttonIndex => {
+        if (buttonIndex == 0) {
+          this.openImageLibrary(selectedBook);
+        } else if (buttonIndex == 1) {
+          this.openCamera(selectedBook);
+        }
+      }
+    );
+  };
+
   renderItem = (item, index) => {
     let swipeoutButtons = [
       {
@@ -217,7 +290,7 @@ class HomeScreen extends React.Component {
         backgroundColor={colors.bgMain}
         right={swipeoutButtons}
       >
-        <ListItem marginVertical={0} item={item}>
+        <ListItem onPress={() => this.addBookImage(item)} editable={true} marginVertical={0} item={item}>
           {item.read &&
             (
               <Ionicons style={{ marginRight: 5 }} name='ios-checkmark' color={colors.logoColor} size={30} />
@@ -322,11 +395,18 @@ const mapDispatchToProps = dispatch => {
     markBookAsRead: book => dispatch({ type: 'MARK_BOOK_AS_READ', payload: book }),
     markBookAsUnread: book => dispatch({ type: 'MARK_BOOK_AS_UNREAD', payload: book }),
     deleteBook: book => dispatch({ type: 'DELETE_BOOK', payload: book }),
-    toggleIsLoadingBooks: bool => dispatch({ type: 'TOGGLE_IS_LOADING_BOOKS', payload: bool })
+    toggleIsLoadingBooks: bool => dispatch({ type: 'TOGGLE_IS_LOADING_BOOKS', payload: bool }),
+    updateBookImage: book =>
+      dispatch({ type: 'UPDATE_BOOK_IMAGE', payload: book })
   }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(HomeScreen);
+const wrapper = compose(
+  connect(mapStateToProps, mapDispatchToProps),
+  connectActionSheet
+);
+
+export default wrapper(HomeScreen);
 
 const styles = StyleSheet.create({
   container: {
