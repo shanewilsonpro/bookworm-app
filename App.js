@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { createAppContainer, createSwitchNavigator, createStackNavigator, createDrawerNavigator, createBottomTabNavigator } from "react-navigation";
+// import { createAppContainer, createSwitchNavigator, createStackNavigator, createDrawerNavigator, createBottomTabNavigator } from "react-navigation";
 
 import WelcomeScreen from "./screens/AppSwitchNavigator/welcome-screen";
 import HomeScreen from "./screens/home-screen";
@@ -21,6 +21,7 @@ import store from "./redux/store";
 
 import BooksCountContainer from "./redux/containers/books-count-container";
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
+import Bookworm from "./bookworm";
 
 class App extends React.Component {
   constructor() {
@@ -29,153 +30,151 @@ class App extends React.Component {
   }
 
   initializeFirebase = () => {
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   };
 
   render() {
     return (
       <Provider store={store}>
-        <ActionSheetProvider>
-        <AppContainer />
-        </ActionSheetProvider>
+        <Bookworm />
       </Provider>
     );
   }
 }
 
-const LoginStackNavigator = createStackNavigator({
-  WelcomeScreen: {
-    screen: WelcomeScreen,
-    navigationOptions: {
-      header: null
-    }
-  },
-  LoginScreen: {
-    screen: LoginScreen,
-    navigationOptions: {}
-  }
-}, {
-  mode: 'modal',
-  defaultNavigationOptions: {
-    headerStyle: {
-      backgroundColor: colors.bgMain
-    }
-  }
-})
+// const LoginStackNavigator = createStackNavigator({
+//   WelcomeScreen: {
+//     screen: WelcomeScreen,
+//     navigationOptions: {
+//       header: null
+//     }
+//   },
+//   LoginScreen: {
+//     screen: LoginScreen,
+//     navigationOptions: {}
+//   }
+// }, {
+//   mode: 'modal',
+//   defaultNavigationOptions: {
+//     headerStyle: {
+//       backgroundColor: colors.bgMain
+//     }
+//   }
+// })
 
-const HomeTabNavigator = createBottomTabNavigator({
-  HomeScreen: {
-    screen: HomeScreen,
-    navigationOptions: {
-      tabBarLabel: 'Total Books',
-      tabBarIcon: ({tintColor}) => 
-        <BooksCountContainer color={tintColor} type="books" />
+// const HomeTabNavigator = createBottomTabNavigator({
+//   HomeScreen: {
+//     screen: HomeScreen,
+//     navigationOptions: {
+//       tabBarLabel: 'Total Books',
+//       tabBarIcon: ({tintColor}) => 
+//         <BooksCountContainer color={tintColor} type="books" />
       
-    }
-  },
-  BooksReadingScreen: {
-    screen: BooksReadingScreen,
-    navigationOptions: {
-      tabBarLabel: 'Books Reading',
-      tabBarIcon: ({tintColor}) => 
-        <BooksCountContainer color={tintColor} type="booksReading"/>
+//     }
+//   },
+//   BooksReadingScreen: {
+//     screen: BooksReadingScreen,
+//     navigationOptions: {
+//       tabBarLabel: 'Books Reading',
+//       tabBarIcon: ({tintColor}) => 
+//         <BooksCountContainer color={tintColor} type="booksReading"/>
       
-    }
-  },
-  BooksReadScreen: {
-    screen: BooksReadScreen,
-    navigationOptions: {
-      tabBarLabel: 'Books Read',
-      tabBarIcon: ({tintColor}) => 
-        <BooksCountContainer color={tintColor} type="booksRead"/>
+//     }
+//   },
+//   BooksReadScreen: {
+//     screen: BooksReadScreen,
+//     navigationOptions: {
+//       tabBarLabel: 'Books Read',
+//       tabBarIcon: ({tintColor}) => 
+//         <BooksCountContainer color={tintColor} type="booksRead"/>
       
-    }
-  }
-}, {
-  tabBarOptions: {
-    style: {
-      backgroundColor: colors.bgMain
-    },
-    activeTintColor: colors.logoColor,
-    inactiveTintColor: colors.bgTextInput
-  }
-});
+//     }
+//   }
+// }, {
+//   tabBarOptions: {
+//     style: {
+//       backgroundColor: colors.bgMain
+//     },
+//     activeTintColor: colors.logoColor,
+//     inactiveTintColor: colors.bgTextInput
+//   }
+// });
 
-HomeTabNavigator.navigationOptions = ({ navigation }) => {
-  const { routeName } = navigation.state.routes[navigation.state.index];
+// HomeTabNavigator.navigationOptions = ({ navigation }) => {
+//   const { routeName } = navigation.state.routes[navigation.state.index];
 
-  switch (routeName) {
-    case 'HomeScreen':
-      return {
-        headerTitle: 'Total Books'
-      };
-    case 'BooksReadingScreen':
-      return {
-        headerTitle: 'Books Reading'
-      };
-    case 'BooksReadScreen':
-      return {
-        headerTitle: 'Books Read'
-      };
-    default:
-      return {
-        headerTitle: 'Bookworm'
-      };
-  }
-}
+//   switch (routeName) {
+//     case 'HomeScreen':
+//       return {
+//         headerTitle: 'Total Books'
+//       };
+//     case 'BooksReadingScreen':
+//       return {
+//         headerTitle: 'Books Reading'
+//       };
+//     case 'BooksReadScreen':
+//       return {
+//         headerTitle: 'Books Read'
+//       };
+//     default:
+//       return {
+//         headerTitle: 'Bookworm'
+//       };
+//   }
+// }
 
-const HomeStackNavigator = createStackNavigator({
-  HomeTabNavigator: {
-    screen: HomeTabNavigator,
-    navigationOptions: ({ navigation }) => {
-      return {
-        headerLeft: (
-          <Ionicons
-            name='ios-menu'
-            size={30}
-            color={colors.logoColor}
-            onPress={() => navigation.openDrawer()}
-            style={{ marginLeft: 10 }}
-          />
-        )
-      }
-    }
-  }
-}, {
-  defaultNavigationOptions: {
-    headerStyle: {
-      backgroundColor: colors.bgMain
-    },
-    headerTintColor: 'white'
-  }
-})
+// const HomeStackNavigator = createStackNavigator({
+//   HomeTabNavigator: {
+//     screen: HomeTabNavigator,
+//     navigationOptions: ({ navigation }) => {
+//       return {
+//         headerLeft: (
+//           <Ionicons
+//             name='ios-menu'
+//             size={30}
+//             color={colors.logoColor}
+//             onPress={() => navigation.openDrawer()}
+//             style={{ marginLeft: 10 }}
+//           />
+//         )
+//       }
+//     }
+//   }
+// }, {
+//   defaultNavigationOptions: {
+//     headerStyle: {
+//       backgroundColor: colors.bgMain
+//     },
+//     headerTintColor: 'white'
+//   }
+// })
 
-const AppDrawerNavigator = createDrawerNavigator({
-  HomeStackNavigator: {
-    screen: HomeStackNavigator,
-    navigationOptions: {
-      title: 'Home',
-      drawerIcon: () => <Ionicons name='ios-home' size={24} />
-    }
-  },
-  SettingsScreen: {
-    screen: SettingsScreen,
-    navigationOptions: {
-      title: 'Settings',
-      drawerIcon: () => <Ionicons name='ios-settings' size={24} />
-    }
-  },
-}, {
-  contentComponent: CustomDrawerComponent
-})
+// const AppDrawerNavigator = createDrawerNavigator({
+//   HomeStackNavigator: {
+//     screen: HomeStackNavigator,
+//     navigationOptions: {
+//       title: 'Home',
+//       drawerIcon: () => <Ionicons name='ios-home' size={24} />
+//     }
+//   },
+//   SettingsScreen: {
+//     screen: SettingsScreen,
+//     navigationOptions: {
+//       title: 'Settings',
+//       drawerIcon: () => <Ionicons name='ios-settings' size={24} />
+//     }
+//   },
+// }, {
+//   contentComponent: CustomDrawerComponent
+// })
 
-const AppSwitchNavigator = createSwitchNavigator({
-  LoadingScreen,
-  LoginStackNavigator,
-  AppDrawerNavigator
-});
+// const AppSwitchNavigator = createSwitchNavigator({
+//   LoadingScreen,
+//   LoginStackNavigator,
+//   AppDrawerNavigator
+// });
 
-const AppContainer = createAppContainer(AppSwitchNavigator);
+// const AppContainer = createAppContainer(AppSwitchNavigator);
 
 export default App;
 

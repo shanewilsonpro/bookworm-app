@@ -6,7 +6,8 @@ import CustomActionButton from "../components/custom-action-button";
 import colors from "../assets/colors";
 import * as firebase from "firebase";
 import 'firebase/auth';
-import 'firebase/database'
+import 'firebase/database';
+import { connect } from "react-redux";
 
 class LoginScreen extends Component {
     constructor() {
@@ -25,8 +26,9 @@ class LoginScreen extends Component {
                 const response = await firebase.auth().
                     signInWithEmailAndPassword(this.state.email, this.state.password);
                 if (response) {
-                    this.setState({ isLoading: false })
-                    this.props.navigation.navigate('LoadingScreen')
+                    this.setState({ isLoading: false });
+                    this.props.signIn(response.user);
+                    // this.props.navigation.navigate('LoadingScreen')
                 }
             } catch (error) {
                 this.setState({ isLoading: false });
@@ -111,7 +113,13 @@ class LoginScreen extends Component {
     }
 }
 
-export default LoginScreen;
+const mapDispatchToProps = dispatch => {
+    return {
+        signIn: user => dispatch({ type: 'SIGN_IN', payload: user})
+    }
+}
+
+export default connect(null, mapDispatchToProps)(LoginScreen);
 
 const styles = StyleSheet.create({
     container: {

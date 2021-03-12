@@ -38,8 +38,7 @@ class HomeScreen extends React.Component {
   }
 
   componentDidMount = async () => {
-    const { navigation } = this.props;
-    const user = navigation.getParam('user');
+    const user = this.props.currentUser;
 
     const currentUserData = await firebase.database().ref('users').child(user.uid).once('value');
 
@@ -56,16 +55,16 @@ class HomeScreen extends React.Component {
     this.props.toggleIsLoadingBooks(false);
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.readCount < this.state.readCount) {
-      console.log('fetch data')
-    }
-    console.log('update')
-  }
+  // componentDidUpdate(prevProps, prevState) {
+  //   if (prevState.readCount < this.state.readCount) {
+  //     console.log('fetch data')
+  //   }
+  //   console.log('update')
+  // }
 
-  componentWillUnmount() {
-    console.log('unmount')
-  }
+  // componentWillUnmount() {
+  //   console.log('unmount')
+  // }
 
   showAddNewBook = () => {
     this.setState({ isAddNewBookVisible: true })
@@ -383,7 +382,8 @@ class HomeScreen extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    books: state.books
+    books: state.books,
+    currentUser: state.auth.currentUser
   }
 }
 

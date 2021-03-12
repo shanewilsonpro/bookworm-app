@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, ScrollView, SafeAreaView, Platform } from 'reac
 import colors from "../../assets/colors";
 import { Ionicons } from "@expo/vector-icons";
 
-import { DrawerItems } from "react-navigation";
+// import { DrawerItems } from "react-navigation";
+import { DrawerItemList } from "@react-navigation/drawer";
 
 class CustomDrawerComponent extends Component {
     render() {
@@ -14,7 +15,7 @@ class CustomDrawerComponent extends Component {
                    <Ionicons name="ios-bookmarks" size={100} color={colors.logoColor} />
                    <Text style={styles.iconText}>Bookworm</Text>
                </View>
-               <DrawerItems {...this.props} />
+               <DrawerItemList {...this.props} />
            </ScrollView>
         )
     }

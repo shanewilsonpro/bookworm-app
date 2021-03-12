@@ -4,13 +4,15 @@ import CustomActionButton from "../components/custom-action-button";
 import colors from "../assets/colors";
 import * as firebase from "firebase";
 import 'firebase/auth';
+import { connect } from "react-redux";
 
 class SettingsScreen extends Component {
 
     signOut = async () => {
         try {
             await firebase.auth().signOut()
-            this.props.navigation.navigate('WelcomeScreen')
+            this.props.signOut();
+            // this.props.navigation.navigate('WelcomeScreen')
         } catch(error) {
             alert('Unable to sign out right now.')
         }
@@ -30,7 +32,13 @@ class SettingsScreen extends Component {
     }
 }
 
-export default SettingsScreen;
+const mapDispatchToProps = dispatch => {
+    return {
+        signOut: user => dispatch({ type: 'SIGN_OUT'})
+    }
+}
+
+export default connect(null, mapDispatchToProps)(SettingsScreen);
 
 const styles = StyleSheet.create({
     container: {
