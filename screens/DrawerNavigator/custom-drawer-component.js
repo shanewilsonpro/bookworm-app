@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, ScrollView, SafeAreaView, Platform } from 'reac
 import colors from "../../assets/colors";
 import { Ionicons } from "@expo/vector-icons";
 
-// import { DrawerItems } from "react-navigation";
 import { DrawerItemList } from "@react-navigation/drawer";
 
 class CustomDrawerComponent extends Component {

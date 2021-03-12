@@ -12,7 +12,6 @@ class SettingsScreen extends Component {
         try {
             await firebase.auth().signOut()
             this.props.signOut();
-            // this.props.navigation.navigate('WelcomeScreen')
         } catch(error) {
             alert('Unable to sign out right now.')
         }

@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import PropTypes from 'prop-types';
-import colors from '../assets/colors';
 
 const ListEmptyComponent = ({ text }) => (
   <View style={styles.listEmptyComponent}>
@@ -22,6 +21,6 @@ const styles = StyleSheet.create({
   },
   listEmptyComponentText: {
     fontWeight: 'bold',
-    color: colors.txtWhite
+    color: 'white'
   }
 });
